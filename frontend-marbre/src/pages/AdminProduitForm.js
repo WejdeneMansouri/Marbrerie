@@ -3,6 +3,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
+import { fetchProduits } from "./api"; // tu peux garder si nécessaire
+import { API_URL } from "./api"; // Assure-toi d'exporter API_URL depuis api.js
 
 const AdminProduitForm = () => {
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ const AdminProduitForm = () => {
 
   const fetchProduit = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/produits/${id}`, {
+      const res = await axios.get(`${API_URL}/produits/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFormData(res.data);
@@ -59,7 +61,7 @@ const AdminProduitForm = () => {
       }
 
       if (id) {
-        await axios.put(`http://localhost:5000/api/produits/${id}`, form, {
+        await axios.put(`${API_URL}/produits/${id}`, form, {
           headers: { 
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`
@@ -67,7 +69,7 @@ const AdminProduitForm = () => {
         });
         alert("✅ Produit modifié");
       } else {
-        await axios.post('http://localhost:5000/api/produits', form, {
+        await axios.post(`${API_URL}/produits`, form, {
           headers: { 
             'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`

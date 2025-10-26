@@ -2,6 +2,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { API_URL } from './api'; // <-- Ajouter ton fichier api.js
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', mot_de_passe: '' });
@@ -10,7 +11,6 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Page à rediriger après login (optionnel)
   const from = location.state?.from || '/';
 
   const handleChange = e =>
@@ -21,7 +21,7 @@ export default function Login() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/login', {
+      const res = await fetch(`${API_URL}/login`, { // ✅ Utilisation API_URL
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -31,11 +31,11 @@ export default function Login() {
       if (res.ok) {
         login(data.token, data.user);
 
-        // 🔹 Redirection selon rôle
+        // Redirection selon rôle
         if (data.user.role === 'admin') {
-          navigate('/admin/dashboard', { replace: true }); // ✅ admin → AdminDashboard
+          navigate('/admin/dashboard', { replace: true });
         } else {
-          navigate('/', { replace: true }); // client → page home
+          navigate('/', { replace: true });
         }
       } else {
         setError(data.msg || 'Email ou mot de passe incorrect');

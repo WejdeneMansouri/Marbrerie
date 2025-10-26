@@ -9,31 +9,34 @@ const AdminClients = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setError('Token manquant. Connectez-vous.');
-          setLoading(false);
-          return;
-        }
+  
+const API_URL = "https://marbrerie.onrender.com/api"; // URL de ton backend en ligne
 
-        const response = await axios.get('http://localhost:5000/api/users', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        setClients(response.data);
+useEffect(() => {
+  const fetchClients = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Token manquant. Connectez-vous.');
         setLoading(false);
-      } catch (err) {
-        console.error('❌ Erreur récupération clients:', err);
-        setError('Impossible de récupérer les clients');
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchClients();
-  }, []);
+      const response = await axios.get(`${API_URL}/users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setClients(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('❌ Erreur récupération clients:', err);
+      setError('Impossible de récupérer les clients');
+      setLoading(false);
+    }
+  };
+
+  fetchClients();
+}, []);
 
   if (loading) return <div className="loading">Chargement des clients...</div>;
   if (error) return <div className="error">{error}</div>;

@@ -1,8 +1,9 @@
 // src/pages/AdminProduits.js
 import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext'; // pour le token
+import { API_URL } from "./api"; // API_URL exporté depuis api.js
+import axios from 'axios';
 
 const AdminProduits = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const AdminProduits = () => {
 
   const fetchProduits = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/produits', {
+      const res = await axios.get(`${API_URL}/produits`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProduits(res.data);
@@ -27,7 +28,7 @@ const AdminProduits = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Supprimer ce produit ?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/produits/${id}`, {
+      await axios.delete(`${API_URL}/produits/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProduits(produits.filter((p) => p.id !== id));

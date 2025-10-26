@@ -7,12 +7,14 @@ export default function Accueil() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch('http://localhost:5000/api/produits')
-      .then(res => res.json())
-      .then(data => setProduits(data))
-      .catch(err => console.error("Erreur chargement produits :", err));
-  }, []);
+const API_URL = "https://marbrerie.onrender.com/api"; // ton backend en ligne
+
+useEffect(() => {
+  fetch(`${API_URL}/produits`)
+    .then(res => res.json())
+    .then(data => setProduits(data))
+    .catch(err => console.error("Erreur chargement produits :", err));
+}, []);
 
   const ajouterAuPanier = (produit) => {
     if (!user) {

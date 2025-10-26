@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { signupUser } from './api'; // <-- import depuis api.js
 
 export default function Signup() {
   const [form, setForm] = useState({
@@ -18,15 +19,11 @@ export default function Signup() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:5000/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
+      const data = await signupUser(form); // <-- appel API centralisé
       alert(data.msg || "Inscription réussie");
-      if (res.ok) navigate('/login');
-    } catch {
+      if (data.success !== false) navigate('/login'); // navigation après succès
+    } catch (err) {
+      console.error('❌ Erreur inscription:', err);
       alert("Erreur inscription");
     }
   }
@@ -47,118 +44,30 @@ export default function Signup() {
       fontSize: '1.8rem',
       color: '#111',
     },
-    inputGroup: {
-      display: 'flex',
-      flexDirection: 'column',
-      marginBottom: '12px',
-    },
-    label: {
-      fontWeight: 'bold',
-      marginBottom: '5px',
-      fontSize: '0.95rem',
-    },
-    input: {
-      padding: '10px',
-      borderRadius: '6px',
-      border: '1px solid #ccc',
-      fontSize: '1rem',
-    },
-    button: {
-      width: '100%',
-      padding: '12px',
-      backgroundColor: '#111',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontWeight: 'bold',
-      fontSize: '1rem',
-      transition: 'background 0.2s',
-    },
-    buttonHover: {
-      backgroundColor: '#333',
-    }
+    inputGroup: { display: 'flex', flexDirection: 'column', marginBottom: '12px' },
+    label: { fontWeight: 'bold', marginBottom: '5px', fontSize: '0.95rem' },
+    input: { padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '1rem' },
+    button: { width: '100%', padding: '12px', backgroundColor: '#111', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', transition: 'background 0.2s' }
   };
 
   return (
     <div style={styles.container}>
       <h2 style={styles.h2}>Créer un compte</h2>
       <form onSubmit={handleSubmit}>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Nom & Prénom</label>
-          <input
-            name="nom"
-            placeholder="Nom & Prénom"
-            value={form.nom}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-        </div>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Email</label>
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-        </div>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Mot de passe</label>
-          <input
-            type="password"
-            name="mot_de_passe"
-            placeholder="Mot de passe"
-            value={form.mot_de_passe}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-        </div>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Téléphone</label>
-          <input
-            name="telephone"
-            placeholder="Téléphone"
-            value={form.telephone}
-            onChange={handleChange}
-            style={styles.input}
-          />
-        </div>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Adresse</label>
-          <input
-            name="adresse"
-            placeholder="Adresse"
-            value={form.adresse}
-            onChange={handleChange}
-            style={styles.input}
-          />
-        </div>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Code Postal</label>
-          <input
-            name="code_postal"
-            placeholder="Code Postal"
-            value={form.code_postal}
-            onChange={handleChange}
-            style={styles.input}
-          />
-        </div>
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>Pays</label>
-          <input
-            name="pays"
-            placeholder="Pays"
-            value={form.pays}
-            onChange={handleChange}
-            style={styles.input}
-          />
-        </div>
+        {Object.keys(form).map((key) => (
+          <div style={styles.inputGroup} key={key}>
+            <label style={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1).replace('_',' ')}</label>
+            <input
+              name={key}
+              type={key === 'email' ? 'email' : key === 'mot_de_passe' ? 'password' : 'text'}
+              placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+              value={form[key]}
+              onChange={handleChange}
+              style={styles.input}
+              required={key === 'nom' || key === 'email' || key === 'mot_de_passe'}
+            />
+          </div>
+        ))}
         <button type="submit" style={styles.button}>S'inscrire</button>
       </form>
     </div>

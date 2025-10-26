@@ -9,44 +9,45 @@ const AdminCommandes = () => {
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-    fetchCommandes();
-  }, [token]);
+  const API_URL = "https://marbrerie.onrender.com/api"; // URL de ton backend en ligne
 
-  const fetchCommandes = async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/api/commandes', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setCommandes(res.data);
-    } catch (err) {
-      console.error("❌ Erreur de chargement des commandes", err);
-    }
-  };
+useEffect(() => {
+  if (!token) {
+    navigate('/login');
+    return;
+  }
+  fetchCommandes();
+}, [token]);
 
-  const updateStatut = async (id, newStatut) => {
-    try {
-      console.log(`🔁 Mise à jour commande ${id} → ${newStatut}`);
-      await axios.put(
-        `http://localhost:5000/api/commandes/${id}`,
-        { statut: newStatut },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+const fetchCommandes = async () => {
+  try {
+    const res = await axios.get(`${API_URL}/commandes`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    setCommandes(res.data);
+  } catch (err) {
+    console.error("❌ Erreur de chargement des commandes", err);
+  }
+};
 
-      setCommandes(commandes.map(cmd =>
-        cmd.id === id ? { ...cmd, statut: newStatut } : cmd
-      ));
-    } catch (err) {
-      console.error("❌ Erreur mise à jour statut", err);
-    }
-  };
+const updateStatut = async (id, newStatut) => {
+  try {
+    console.log(`🔁 Mise à jour commande ${id} → ${newStatut}`);
+    await axios.put(
+      `${API_URL}/commandes/${id}`,
+      { statut: newStatut },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
+    setCommandes(commandes.map(cmd =>
+      cmd.id === id ? { ...cmd, statut: newStatut } : cmd
+    ));
+  } catch (err) {
+    console.error("❌ Erreur mise à jour statut", err);
+  }
+};
   const handleAccepter = (id) => updateStatut(id, "acceptée");
   const handleRejeter = (id) => updateStatut(id, "rejetée");
 

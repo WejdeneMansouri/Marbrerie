@@ -3,6 +3,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from "./api"; // utilisation de l'API en ligne
 
 const AjoutAdmins = () => {
   const { token } = useContext(AuthContext);
@@ -28,7 +29,7 @@ const AjoutAdmins = () => {
 
   const fetchAdmins = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/admins', {
+      const res = await axios.get(`${API_URL}/admins`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAdmins(res.data);
@@ -48,7 +49,7 @@ const AjoutAdmins = () => {
     e.preventDefault();
     try {
       await axios.post(
-        'http://localhost:5000/api/admins',
+        `${API_URL}/admins`,
         { ...formData },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -64,7 +65,7 @@ const AjoutAdmins = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer cet admin ?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/admins/${id}`, {
+      await axios.delete(`${API_URL}/admins/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAdmins(admins.filter((a) => a.id !== id));

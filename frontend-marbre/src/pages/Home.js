@@ -2,6 +2,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
+import { API_URL } from './api'; // <-- URL du backend en ligne
 
 export default function Accueil() {
   const navigate = useNavigate();
@@ -9,15 +10,15 @@ export default function Accueil() {
   const [produits, setProduits] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Charger les produits depuis l'API
+  // Charger les produits depuis l'API en ligne
   useEffect(() => {
-    fetch('http://localhost:5000/api/produits')
+    fetch(`${API_URL}/produits`)
       .then(res => res.json())
       .then(data => setProduits(data))
       .catch(err => console.error("Erreur chargement produits :", err));
   }, []);
 
-  // Défilement automatique toutes les 5 secondes
+  // Défilement automatique toutes les secondes
   useEffect(() => {
     if (produits.length === 0) return;
     const interval = setInterval(() => {
@@ -124,9 +125,9 @@ export default function Accueil() {
       <div style={styles.nav}>
         <div style={styles.links}>
           <span onClick={() => navigate('/home')}>Home</span>
-          <span onClick={() => navigate('/acceuil')}>Produits</span>
+          <span onClick={() => navigate('/produits')}>Produits</span>
           <span onClick={() => navigate('/mes-commandes')}>Mes commandes</span>
-          <span style={{ cursor: 'pointer' }} onClick={() => navigate('/Apropos')}>À propos</span>
+          <span style={{ cursor: 'pointer' }} onClick={() => navigate('/apropos')}>À propos</span>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button style={styles.loginBtn} onClick={() => navigate('/panier')}>Panier</button>
@@ -154,7 +155,7 @@ export default function Accueil() {
         </div>
       )}
 
-      <button style={styles.button} onClick={() => navigate('/acceuil')}>
+      <button style={styles.button} onClick={() => navigate('/produits')}>
         Voir tous les produits
       </button>
     </div>

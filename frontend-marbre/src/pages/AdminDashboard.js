@@ -11,29 +11,31 @@ const AdminDashboard = () => {
     revenus: 0
   });
 
-  const fetchStats = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
+ const API_URL = "https://marbrerie.onrender.com/api"; // URL de ton backend en ligne
 
-      const response = await axios.get('http://localhost:5000/api/admin/stats', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+const fetchStats = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-      setStats({
-        produits: response.data.produits,
-        admins: response.data.admins,
-        commandes: response.data.commandes,
-        revenus: response.data.revenus
-      });
-    } catch (err) {
-      console.error('❌ Erreur récupération stats:', err);
-    }
-  };
+    const response = await axios.get(`${API_URL}/admin/stats`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+    setStats({
+      produits: response.data.produits,
+      admins: response.data.admins,
+      commandes: response.data.commandes,
+      revenus: response.data.revenus
+    });
+  } catch (err) {
+    console.error('❌ Erreur récupération stats:', err);
+  }
+};
+
+useEffect(() => {
+  fetchStats();
+}, []);
 
   return (
     <div className="dashboard">

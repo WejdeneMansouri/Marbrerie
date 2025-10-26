@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
 import { AuthContext } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { fetchCommandes } from './api'; // <-- import depuis api.js
 
 export default function MesCommandes() {
   const { user } = useContext(AuthContext);
@@ -14,12 +14,17 @@ export default function MesCommandes() {
       return;
     }
 
-    axios.get('http://localhost:5000/api/commandes')
-      .then(res => {
-        const mesCommandes = res.data.filter(c => c.user_id === user.id);
+    const getCommandes = async () => {
+      try {
+        const data = await fetchCommandes();
+        const mesCommandes = data.filter(c => c.user_id === user.id);
         setCommandes(mesCommandes);
-      })
-      .catch(err => console.error('❌ Erreur récupération commandes:', err));
+      } catch (err) {
+        console.error('❌ Erreur récupération commandes:', err);
+      }
+    };
+
+    getCommandes();
   }, [user, navigate]);
 
   const styles = {

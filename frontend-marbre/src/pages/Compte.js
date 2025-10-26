@@ -1,6 +1,8 @@
+// src/pages/Compte.js
 import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from './api'; // <-- Import de ton URL backend en ligne
 
 export default function Compte() {
   const { user, logout, login } = useContext(AuthContext);
@@ -26,8 +28,8 @@ export default function Compte() {
     setMessage('');
 
     try {
-      // Utiliser toujours la route /api/users/:id
-      const endpoint = `http://localhost:5000/api/users/${user.id}`;
+      // Utiliser API_URL pour le backend en ligne
+      const endpoint = `${API_URL}/users/${user.id}`;
 
       console.log("Token utilisé :", localStorage.getItem('token'));
       console.log("User actuel :", user);
@@ -56,7 +58,6 @@ export default function Compte() {
 
   return (
     <div style={styles.container}>
-      {/* Barre de navigation différente selon le rôle */}
       <div style={styles.nav}>
         {user?.role === 'admin' ? (
           <div style={styles.links}>
@@ -67,9 +68,9 @@ export default function Compte() {
         ) : (
           <div style={styles.links}>
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/home')}>Home</span>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/acceuil')}>Produits</span>
+            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/produits')}>Produits</span>
             <span style={{ cursor: 'pointer' }} onClick={() => navigate('/mes-commandes')}>Mes commandes</span>
-            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/Apropos')}>À propos</span>
+            <span style={{ cursor: 'pointer' }} onClick={() => navigate('/apropos')}>À propos</span>
           </div>
         )}
         {user?.role !== 'admin' && (
@@ -79,7 +80,6 @@ export default function Compte() {
         )}
       </div>
 
-      {/* Formulaire modification compte */}
       <div style={styles.formContainer}>
         <h1 style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           {user?.role === 'admin' ? 'Mon Profil Admin' : 'Mon Compte'}
