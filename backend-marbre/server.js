@@ -1,4 +1,4 @@
-// server.js
+// backend-marbre/server.js
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'secret123';
@@ -13,7 +13,7 @@ require('dotenv').config();
 
 const app = express();
 
-// CORS : autoriser le frontend Render
+// CORS : autoriser le frontend
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   credentials: true
@@ -26,12 +26,12 @@ app.use(express.urlencoded({ extended: true }));
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
-// Connexion MySQL depuis variables env
+// Connexion MySQL via .env
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'marbre_app'
 });
 
 db.connect(err => {
@@ -39,7 +39,7 @@ db.connect(err => {
   console.log('✅ Connecté à MySQL');
 });
 
-// Multer
+// Multer pour images
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => {
@@ -51,6 +51,11 @@ const upload = multer({ storage });
 
 // URL backend public
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
+
+// 🔹 Routes
+
+// Test route
+app.get("/api/test", (req, res) => res.send("API OK ✅"));
 
 // Signup
 app.post('/api/signup', async (req, res) => {
@@ -74,6 +79,31 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
+// Login
+app.post('/api/login', async (req, res) => {
+  const { email, mot_de_passe } = req.body;
+  if (!email || !mot_de_passe) return res.status(400).json({ msg: "Champs manquants" });
+
+  try {
+    const [rows] = await db.promise().query('SELECT * FROM users WHERE email = ?', [email]);
+    if (rows.length === 0) return res.status(400).json({ msg: "Utilisateur non trouvé" });
+
+    const user = rows[0];
+    const isMatch = await bcrypt.compare(mot_de_passe, user.mot_de_passe);
+    if (!isMatch) return res.status(400).json({ msg: "Mot de passe incorrect" });
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role, nom: user.nom, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    res.json({ token, user: { id: user.id, nom: user.nom, email: user.email, role: user.role } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Erreur serveur" });
+  }
+});
+
 // Serve uploads
 app.use('/uploads', express.static('uploads'));
 
@@ -81,7 +111,7 @@ app.use('/uploads', express.static('uploads'));
 app.get('/api/produits', (req, res) => {
   db.query("SELECT * FROM produits", (err, result) => {
     if (err) return res.status(500).send("Erreur récupération");
-    // Remplace localhost par BACKEND_URL pour que le frontend affiche les images
+    // Corrige les URLs pour le frontend
     const produits = result.map(p => ({
       ...p,
       image_url: p.image_url ? p.image_url.replace('http://localhost:5000', BACKEND_URL) : null
@@ -90,10 +120,23 @@ app.get('/api/produits', (req, res) => {
   });
 });
 
-// Test route
-app.get("/api/test", (req, res) => res.send("API OK ✅"));
+// Ajouter un produit (admin + auth)
+app.post('/api/produits', upload.single('image'), (req, res) => {
+  const { nom, gamme, marque, prix_m2, quantite } = req.body;
+  const image_url = req.file ? `${BACKEND_URL}/uploads/${req.file.filename}` : null;
+
+  if (!nom || !gamme || !marque || !prix_m2 || !quantite || !image_url)
+    return res.status(400).send("Tous les champs sont requis !");
+
+  const sql = "INSERT INTO produits (nom, gamme, marque, prix_m2, quantite, image_url) VALUES (?, ?, ?, ?, ?, ?)";
+  db.query(sql, [nom, gamme, marque, prix_m2, quantite, image_url], (err, result) => {
+    if (err) return res.status(500).send("Erreur ajout produit");
+    res.status(201).json({ id: result.insertId, nom, gamme, marque, prix_m2, quantite, image_url });
+  });
+});
 
 // Démarrage serveur
-app.listen(process.env.PORT || 5000, () => {
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
   console.log(`🚀 Serveur backend sur ${BACKEND_URL}`);
 });
