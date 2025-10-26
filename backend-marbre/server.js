@@ -370,7 +370,10 @@ app.put('/api/commandes/:id', authMiddleware, adminMiddleware, (req, res) => {
   });
 });
 
-
+// 👉 Route de test
+app.get("/api/test", (req, res) => {
+  res.send("API OK ✅");
+});
 // 🚀 Serveur
 app.listen(5000, () => {
   console.log('🚀 Serveur backend sur http://localhost:5000');
