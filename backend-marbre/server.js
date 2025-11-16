@@ -110,7 +110,8 @@ app.use('/uploads', express.static('uploads'));
 // Produits
 app.get('/api/produits', (req, res) => {
   db.query("SELECT * FROM produits", (err, result) => {
-    if (err) return res.status(500).send("Erreur récupération");
+    if (err) return res.status(500).json({ msg: "Erreur récupération BDD" });
+
     // Corrige les URLs pour le frontend
     const produits = result.map(p => ({
       ...p,
