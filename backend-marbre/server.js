@@ -59,25 +59,35 @@ app.get("/api/test", (req, res) => res.send("API OK ✅"));
 
 // Signup
 app.post('/api/signup', async (req, res) => {
-  const { nom, email, mot_de_passe, role } = req.body;
-  if (!nom || !email || !mot_de_passe) return res.status(400).json({ msg: "Champs manquants" });
+  const { nom, email, mot_de_passe, telephone, adresse, code_postal, pays, role } = req.body;
+
+  if (!nom || !email || !mot_de_passe) 
+    return res.status(400).json({ msg: "Champs manquants" });
 
   try {
-    const [rows] = await db.promise().query('SELECT * FROM users WHERE email = ?', [email]);
-    if (rows.length > 0) return res.status(400).json({ msg: "Utilisateur existant" });
+    const [rows] = await db.promise().query(
+      'SELECT * FROM users WHERE email = ?', 
+      [email]
+    );
+
+    if (rows.length > 0) 
+      return res.status(400).json({ msg: "Utilisateur existant" });
 
     const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
+
     await db.promise().query(
-      'INSERT INTO users (nom, email, mot_de_passe, role, date_creation) VALUES (?, ?, ?, ?, NOW())',
-      [nom, email, hashedPassword, role || 'client']
+      'INSERT INTO users (nom, email, mot_de_passe, role, telephone, adresse, code_postal, pays, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+      [nom, email, hashedPassword, role || 'client', telephone, adresse, code_postal, pays]
     );
 
     res.json({ msg: "Utilisateur créé" });
+
   } catch (err) {
-    console.error(err);
+    console.error("ERREUR SIGNUP :", err);
     res.status(500).json({ msg: "Erreur serveur" });
   }
 });
+
 
 // Login
 app.post('/api/login', async (req, res) => {
