@@ -15,7 +15,11 @@ const app = express();
 
 // CORS : autoriser le frontend
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: [
+    "https://marbrerie-front.onrender.com",
+    "http://localhost:3000"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 
@@ -28,11 +32,14 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
 // Connexion MySQL via .env
 const db = mysql.createConnection({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'marbre_app'
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT
 });
+
+
 
 db.connect(err => {
   if (err) return console.error("❌ Erreur MySQL :", err);
