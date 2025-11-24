@@ -13,7 +13,15 @@ require('dotenv').config();
 
 const app = express();
 
-
+// CORS : autoriser le frontend
+app.use(cors({
+  origin: [
+    "https://marbrerie-front.onrender.com",
+    "http://localhost:3000"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -50,35 +58,6 @@ const upload = multer({ storage });
 
 // URL backend public
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:5000';
-
-// Correction CORS complète (gère aussi les preflight OPTIONS)
-app.options('*', cors({
-  origin: [
-    "https://marbrerie-front.onrender.com",
-    "http://localhost:3000"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
-// CORS : permet le frontend local + Render
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://marbrerie-front.onrender.com"
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // autorise Postman & serveur local sans origine
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error("Origine non autorisée par CORS"));
-  },
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
-
-// Preflight
-app.options('*', cors());
 
 
 // 🔹 Routes
